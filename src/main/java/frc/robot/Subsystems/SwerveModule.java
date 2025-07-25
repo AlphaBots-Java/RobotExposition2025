@@ -1,5 +1,7 @@
 package frc.robot.Subsystems;
 
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -35,17 +37,10 @@ public class SwerveModule {
         driveMotor.setInverted(driveMotorReversed);
         turningMotor.setInverted(turningMotorReversed);
 
-        //SE VOCÊ VER ISSO E A SWERVE FUNCIONAR APAGUE TODOS OS COMENTARIOS
-        //driveEncoder.setPositionConversionFactor(ModuleConstants.kDriveEncoderRot2Meter);
-        //driveEncoder.setVelocityConversionFactor(ModuleConstants.kDriveEncoderRPM2MeterPerSec);
-        //turningEncoder.setPositionConversionFactor(ModuleConstants.kTurningEncoderRot2Rad);
-        //turningEncoder.setVelocityConversionFactor(ModuleConstants.kTurningEncoderRPM2RadPerSec);
-
-
-        turningPidController = new PIDController(ModuleConstants.kPTurning, 0, 0);
+        turningPidController = new PIDController(0.5, 0, 0);
         turningPidController.enableContinuousInput(-Math.PI, Math.PI);
 
-        resetEncoders();
+        
     }
 
     public double getDrivePosition() {
@@ -65,7 +60,7 @@ public class SwerveModule {
     }
 
     public double getAbsoluteEncoderRad() {
-        double angle = (absoluteEncoder.getAbsolutePosition().getValueAsDouble()/ 180) * Math.PI;
+        double angle = absoluteEncoder.getAbsolutePosition().getValue().in(Radians);
         return angle * (absoluteEncoderReversed ? -1.0 : 1.0);
     }
 
@@ -78,12 +73,20 @@ public class SwerveModule {
         return new SwerveModuleState(getDriveVelocity(), new Rotation2d(getTurningPosition()));
     }
 
-    public void setDesiredState(SwerveModuleState state) {
+    public Rotation2d getRotation2d() {
+        return new Rotation2d(getAbsoluteEncoderRad());
+    }
+
+    public void setDesiredState(SwerveModuleState state, Rotation2d rotation2d) {
         if (Math.abs(state.speedMetersPerSecond) < 0.001) {
             stop();
             return;
         }
-        state = SwerveModuleState.optimize(state, getState().angle);
+        
+        rotation2d = new Rotation2d(getAbsoluteEncoderRad());
+
+        state.optimize(rotation2d);
+        
         driveMotor.set(state.speedMetersPerSecond / DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
         turningMotor.set(turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
         SmartDashboard.putString("Swerve[" + absoluteEncoder.getDeviceID() + "] state", state.toString());

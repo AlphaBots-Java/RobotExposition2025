@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Commands.AnguladorController;
+import frc.robot.Commands.ElevatorController;
+import frc.robot.Commands.SugadorController;
 import frc.robot.Commands.SwerveCommand;
 import frc.robot.Subsystems.SwerveSubsystem;
 
@@ -17,12 +20,17 @@ public class RobotContainer {
 
   private final SwerveSubsystem swerve = new SwerveSubsystem();
   private final Joystick controller = new Joystick(0);
+  private final PS5Controller buttonController = new PS5Controller(0);
+
+  private final AnguladorController angulador = new AnguladorController();
+  private final SugadorController sugador = new SugadorController();
+  private final ElevatorController elevator = new ElevatorController();
 
   public RobotContainer() {
     Supplier<Double> axisZero = () -> this.controller.getRawAxis(0);
     Supplier<Double> axisOne = () -> this.controller.getRawAxis(1);
     Supplier<Double> axisTwo = () -> this.controller.getRawAxis(2);
-    Supplier<Boolean> buttonSup = () -> this.controller.getRawButton(5);
+    Supplier<Boolean> buttonSup = () -> this.buttonController.getOptionsButtonPressed();
 
     swerve.setDefaultCommand(new SwerveCommand(
       this.swerve,
@@ -31,8 +39,17 @@ public class RobotContainer {
       axisTwo,
       buttonSup
     ));
-
+    
     configureBindings();
+  }
+
+  public void PegadorDeCoral(){
+    elevator.ControllElevator();
+    elevator.UpdateSetPoint();
+    angulador.ControllAngulador();
+    angulador.UpdateSetPoint();
+    sugador.ControllVellocity();
+    sugador.UpdateVellocity();
   }
 
   private void configureBindings() {}

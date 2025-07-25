@@ -1,5 +1,4 @@
-package frc.robot.Subsystems;
-
+package frc.robot.Subsystems; 
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -69,7 +68,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public double getHeading() {
-        return Math.IEEEremainder(pigeon.getAngle(), 360);
+        return Math.IEEEremainder(pigeon.getYaw().getValueAsDouble(),360);
     }
 
     public Rotation2d getRotation2d() {
@@ -90,6 +89,10 @@ public class SwerveSubsystem extends SubsystemBase {
         //        backRight.getState());
         SmartDashboard.putNumber("Robot Heading", getHeading());
         //SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
+        SmartDashboard.putNumber("angle", frontLeft.getAbsoluteEncoderRad());
+        SmartDashboard.putNumber("angle1", backLeft.getAbsoluteEncoderRad());
+        SmartDashboard.putNumber("angle2", frontRight.getAbsoluteEncoderRad());
+        SmartDashboard.putNumber("angle3", backRight.getAbsoluteEncoderRad());
     }
 
     public void stopModules() {
@@ -100,10 +103,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
-        frontLeft.setDesiredState(desiredStates[0]);
-        frontRight.setDesiredState(desiredStates[1]);
-        backLeft.setDesiredState(desiredStates[2]);
-        backRight.setDesiredState(desiredStates[3]);
+        //SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
+        frontLeft.setDesiredState(desiredStates[0], frontLeft.getRotation2d());
+        frontRight.setDesiredState(desiredStates[1], frontRight.getRotation2d());
+        backLeft.setDesiredState(desiredStates[2], backLeft.getRotation2d());
+        backRight.setDesiredState(desiredStates[3], backRight.getRotation2d());
     }
 }
