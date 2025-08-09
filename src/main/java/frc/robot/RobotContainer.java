@@ -30,7 +30,7 @@ public class RobotContainer {
     Supplier<Double> axisZero = () -> this.controller.getRawAxis(0);
     Supplier<Double> axisOne = () -> this.controller.getRawAxis(1);
     Supplier<Double> axisTwo = () -> this.controller.getRawAxis(2);
-    Supplier<Boolean> buttonSup = () -> this.buttonController.getOptionsButtonPressed();
+    Supplier<Boolean> buttonSup = () -> this.buttonController.getPSButtonPressed();
 
     swerve.setDefaultCommand(new SwerveCommand(
       this.swerve,
@@ -40,7 +40,6 @@ public class RobotContainer {
       buttonSup
     ));
     
-    configureBindings();
   }
 
   public void PegadorDeCoral(){
@@ -50,9 +49,14 @@ public class RobotContainer {
     angulador.UpdateSetPoint();
     sugador.ControllVellocity();
     sugador.UpdateVellocity();
+    configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    if(buttonController.getOptionsButtonPressed()){
+      swerve.zeroHeading();
+    }
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");

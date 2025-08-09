@@ -51,7 +51,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
         
     private final Pigeon2 pigeon = new Pigeon2(5, "SwerveCAN");
-    
+    // private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, new Rotation2d(0), null);
+
     public SwerveSubsystem() {
 
         new Thread(() -> {

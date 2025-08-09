@@ -16,7 +16,6 @@ public class AnguladorController {
     }
 
     public void UpdateSetPoint(){
-        // 1 setpoint = 7mm;;;
         if(controller.getTriangleButtonReleased()){
             angulador.AngUpdateSetPoint(-0.51);
         }
