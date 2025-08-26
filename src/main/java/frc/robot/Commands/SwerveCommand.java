@@ -3,6 +3,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
@@ -14,6 +15,8 @@ public class SwerveCommand extends Command {
     private Supplier<Double> xSpdFunction, ySpdFunction, turningSpdFunction;
     private Supplier<Boolean> fieldOrientedFunction;
     private SlewRateLimiter xLimiter, yLimiter, turningLimiter;
+
+    private PS5Controller controller = new PS5Controller(0);
 
     public SwerveCommand(SwerveSubsystem swerveSubsystem,
             Supplier<Double> xSpdFunction, Supplier<Double> ySpdFunction, Supplier<Double> turningSpdFunction,
@@ -36,9 +39,18 @@ public class SwerveCommand extends Command {
     @Override
     public void execute() {
         // 1. Get real-time joystick inputs
-        double xSpeed = xSpdFunction.get();
-        double ySpeed = ySpdFunction.get();
+        double xSpeed;
+        double ySpeed;
         double turningSpeed = turningSpdFunction.get();
+        if (controller.getPSButton()){
+
+            xSpeed = 0;
+            ySpeed = -0.1;
+
+        }else{
+            xSpeed = xSpdFunction.get();
+            ySpeed = ySpdFunction.get();
+        }
 
         // 2. Apply deadband
         xSpeed = Math.abs(xSpeed) > OIConstants.kDeadband ? xSpeed : 0.0;

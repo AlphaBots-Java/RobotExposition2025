@@ -62,11 +62,14 @@ public final class Constants {
         public static final boolean kBackLeftDriveAbsoluteEncoderReversed = false;
         public static final boolean kFrontRightDriveAbsoluteEncoderReversed = false;
         public static final boolean kBackRightDriveAbsoluteEncoderReversed = false;
+        
+        // Caso essas constantes estejam mal calibradas, zere-as, coloque as rodas da swerve no zero, veja o numero que deu na smart dashboard
+        // Apos isso, coloque aa swerve full pra frente (preferencialmente desreferenciada) e coloque a diferenca dos valores ai
 
-        public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = 0;
-        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = 0;
+        public static final double kFrontLeftDriveAbsoluteEncoderOffsetRad = -0.060;
+        public static final double kBackLeftDriveAbsoluteEncoderOffsetRad = -0.044;
         public static final double kFrontRightDriveAbsoluteEncoderOffsetRad = 0;
-        public static final double kBackRightDriveAbsoluteEncoderOffsetRad = 0;
+        public static final double kBackRightDriveAbsoluteEncoderOffsetRad = 0.198;
 
         public static final double kPhysicalMaxSpeedMetersPerSecond = 5  ;
         public static final double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;

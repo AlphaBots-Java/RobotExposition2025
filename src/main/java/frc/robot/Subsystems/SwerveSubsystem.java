@@ -68,13 +68,16 @@ public class SwerveSubsystem extends SubsystemBase {
         pigeon.reset();
     }
 
+    //Correcao da orientacao do robo (-90)
     public double getHeading() {
-        return Math.IEEEremainder(pigeon.getYaw().getValueAsDouble(),360);
+        // return Math.IEEEremainder(pigeon.getYaw().getValueAsDouble() - 90,360);
+        return -90;
     }
 
     public Rotation2d getRotation2d() {
         return Rotation2d.fromDegrees(getHeading());
     }
+
 
     //public Pose2d getPose() {
     //    return odometer.getPoseMeters();
