@@ -2,24 +2,31 @@ package frc.robot.Subsystems;
 
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.MissingFormatWidthException;
+
+import javax.sound.midi.Soundbank;
+
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 
 
+
 public class SwerveModule {
     
     private final TalonFX driveMotor;
     private final TalonFX turningMotor;
-
+  
     private final PIDController turningPidController;
-
+    
     private final CANcoder absoluteEncoder;
     private final boolean absoluteEncoderReversed;
     private final double absoluteEncoderOffsetRad;
@@ -40,8 +47,15 @@ public class SwerveModule {
         turningPidController = new PIDController(0.5, 0.05, 0);
         turningPidController.enableContinuousInput(-Math.PI, Math.PI);
 
-        
+     
+        // Orchestra orchestra = new Orchestra();
+
+        // orchestra.addInstrument(driveMotor);
+        // orchestra.loadMusic('./MarioSound.mp3');
+           
     }
+
+    
 
     public double getDrivePosition() {
         return driveMotor.getPosition().getValueAsDouble() * ModuleConstants.kDriveEncoderRot2Meter;
@@ -95,5 +109,12 @@ public class SwerveModule {
     public void stop() {
         driveMotor.set(0);
         turningMotor.set(0);
+    }
+
+    public SwerveModulePosition GetModulePosition(){
+        return new SwerveModulePosition(
+        this.getDrivePosition()
+        ,this.getRotation2d()
+        );
     }
 }

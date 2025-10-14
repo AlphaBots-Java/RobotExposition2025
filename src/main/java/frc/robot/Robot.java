@@ -22,6 +22,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    m_robotContainer.PrintThings();
   }
 
   @Override
@@ -43,7 +44,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    m_robotContainer.PegadorDeCoralAuto();
+  }
 
   @Override
   public void autonomousExit() {}
@@ -57,7 +60,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    m_robotContainer.PegadorDeCoral();
+    m_robotContainer.PegadorDeCoralTeleop();
   }
 
   @Override

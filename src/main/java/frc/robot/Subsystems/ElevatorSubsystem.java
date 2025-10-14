@@ -8,9 +8,10 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PS5Controller;
 
 public class ElevatorSubsystem {
     
@@ -40,7 +41,8 @@ public class ElevatorSubsystem {
     }
 
     public void SetPoint(){
-        cansparkMax.set(pidController.calculate(cansparkMax.getEncoder().getPosition(), elevatorSetPoint) * 0.05);
+        cansparkMax.set(pidController.calculate(cansparkMax.getEncoder().getPosition(), elevatorSetPoint ) * 0.05);
+        
     }
     public void UpdateSetPoint(double setpoint){
         this.elevatorSetPoint = setpoint;

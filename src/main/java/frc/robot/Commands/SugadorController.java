@@ -14,20 +14,27 @@ public class SugadorController {
     }
 
     public void UpdateVellocity(){
-        // 1 setpoint = 7mm;;;
-        if(controller.getR2Button()){
+        // 1 setpoint = 7mm;
+        if(controller.getL2Button()){
             sugador.SugUpdateSetVellocity(-0.45);
         }
-        if (controller.getR2ButtonReleased()) {
-            sugador.SugUpdateSetVellocity(0.05);
-        }
-
-        if(controller.getL2Button()){
+        else if(controller.getR1Button()){
             sugador.SugUpdateSetVellocity(0.4);
         }
-        if (controller.getL2ButtonReleased()) {
-            sugador.SugUpdateSetVellocity(0.05);
+        else {
+            sugador.SugUpdateSetVellocity(0.06);
         }
         
+    }
+
+    public void Sugar(){
+        sugador.SugUpdateSetVellocity(0.45);
+    }
+
+    public void Soltar(){
+        sugador.SugUpdateSetVellocity(-0.4);
+    }
+    public void Parar(){
+        sugador.SugUpdateSetVellocity(0);
     }
 }

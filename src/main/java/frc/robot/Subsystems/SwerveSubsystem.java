@@ -48,10 +48,17 @@ public class SwerveSubsystem extends SubsystemBase {
             DriveConstants.kBackRightDriveAbsoluteEncoderPort,
             DriveConstants.kBackRightDriveAbsoluteEncoderOffsetRad,
             DriveConstants.kBackRightDriveAbsoluteEncoderReversed);
-
+    SwerveModulePosition[] saas;
         
     private final Pigeon2 pigeon = new Pigeon2(5, "SwerveCAN");
-    // private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, new Rotation2d(0), null);
+    private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, Rotation2d.fromDegrees(0),
+                                                                        new SwerveModulePosition[]{
+                                                                            frontLeft.GetModulePosition(),
+                                                                            frontRight.GetModulePosition(), 
+                                                                            backLeft.GetModulePosition(), 
+                                                                            backRight.GetModulePosition(),}
+                                                                            );
+    
 
     public SwerveSubsystem() {
 
@@ -70,8 +77,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     //Correcao da orientacao do robo (-90)
     public double getHeading() {
-        // return Math.IEEEremainder(pigeon.getYaw().getValueAsDouble() - 90,360);
-        return -90;
+        return Math.IEEEremainder(pigeon.getYaw().getValueAsDouble() - 90,360);
+        // return -90;
     }
 
     public Rotation2d getRotation2d() {
@@ -79,21 +86,30 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
 
-    //public Pose2d getPose() {
-    //    return odometer.getPoseMeters();
-    //}
+    public Pose2d getPose() {
+       return odometer.getPoseMeters();
+    }
 
-    //public void resetOdometry(Pose2d pose) {
-    //    odometer.resetPosition(pose, getRotation2d());
-    //}
+    public void resetOdometry(Pose2d pose) {
+       odometer.resetPosition(getRotation2d(), new SwerveModulePosition[]{
+                                                frontLeft.GetModulePosition(),
+                                                frontRight.GetModulePosition(), 
+                                                backLeft.GetModulePosition(), 
+                                                backRight.GetModulePosition()}, pose);
+    }
 
     @Override
     public void periodic() {
-        //odometer.update(getRotation2d(), frontLeft.getState(), frontRight.getState(), backLeft.getState(),
-        //        backRight.getState());
+        odometer.update(getRotation2d(), new SwerveModulePosition[]{frontLeft.GetModulePosition(),
+                                                                    frontRight.GetModulePosition(),
+                                                                    backLeft.GetModulePosition(), 
+                                                                    backRight.GetModulePosition()});
+
+
         SmartDashboard.putNumber("Robot Heading", getHeading());
-        //SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
-        SmartDashboard.putNumber("angle", frontLeft.getAbsoluteEncoderRad());
+        SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
+
+        SmartDashboard.putNumber("angle0", frontLeft.getAbsoluteEncoderRad());
         SmartDashboard.putNumber("angle1", backLeft.getAbsoluteEncoderRad());
         SmartDashboard.putNumber("angle2", frontRight.getAbsoluteEncoderRad());
         SmartDashboard.putNumber("angle3", backRight.getAbsoluteEncoderRad());
@@ -107,7 +123,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-        //SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveConstants.kPhysicalMaxSpeedMetersPerSecond);
         frontLeft.setDesiredState(desiredStates[0], frontLeft.getRotation2d());
         frontRight.setDesiredState(desiredStates[1], frontRight.getRotation2d());
         backLeft.setDesiredState(desiredStates[2], backLeft.getRotation2d());
