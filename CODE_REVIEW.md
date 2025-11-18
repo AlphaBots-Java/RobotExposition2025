@@ -449,4 +449,4 @@ Funciona como um controlador proporcional simples para strafe e avanço baseados
 * Tratamento de ausência de alvo e de limites numéricos.
 * Um setpoint claro de distância e deadband para estabilizar o robô.
 
-Com pequenas refatorações, ele pode ficar mais robusto, legível e seguro em campo.
+Com pequenas refatorações, ele pode ficar mais robusto, legível e seguro em Jogo.
