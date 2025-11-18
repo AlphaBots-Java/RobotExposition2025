@@ -282,4 +282,171 @@ E remover closed-loop interno do Spark.
 
 * Construtor incorreto evita que a configuração seja aplicada.
 * Controle está extremamente inconsistente: unidades diferentes, divisão inteira errada, soma com magic numbers, feedforward com cálculos incorretos e PID duplo.
-* Estrutura precisa de uma revisão completa focada em *unidades físicas*, *encapsulamento* e *coerência entre os métodos de contr
+* Estrutura precisa de uma revisão completa focada em *unidades físicas*, *encapsulamento* e *coerência entre os métodos de controle*.
+
+---
+
+## Review: LimeLightSubsystem
+
+### 1. Ausência de construtor e uso puramente estático
+
+O subsistema não possui construtor nem estado interno real (além de `maxSpeedX` e `maxSpeedY`), e todos os métodos trabalham só com leituras instantâneas da Limelight e cálculo direto. Isso até funciona, mas:
+
+* `maxSpeedX` e `maxSpeedY` são `public` e podem ser alterados de qualquer lugar.
+* O subsistema poderia ser melhor encapsulado com `private` + getters/setters, ou constantes.
+
+### 2. Leitura de NetworkTables repetida e sem verificação de alvo
+
+Em `DistanceToTarget()`:
+
+```java
+NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight-esq");
+NetworkTableEntry ty = table.getEntry("ty");
+double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+```
+
+Problemas:
+
+* A tabela e a entry são buscadas toda vez que o método é chamado.
+* Não há verificação de `tv` (target valid). Se não houver alvo, o sistema assume `ty = 0`, o que gera um cálculo de distância potencialmente absurdo.
+
+Sugestão:
+
+* Armazenar o `NetworkTable` ou usar helpers da própria Limelight.
+* Verificar se há alvo antes de calcular distância (por exemplo, se `tv == 0` → retornar 0 ou manter último valor válido).
+
+### 3. Risco numérico em `Math.tan(angleToGoalRadians)`
+
+Se `angleToGoalRadians` estiver próximo de 0, a tangente tende a 0 e o cálculo:
+
+```java
+(goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians)
+```
+
+Pode resultar em valores enormes, infinito ou NaN.
+
+Seria mais seguro checar algo como:
+
+```java
+if (Math.abs(angleToGoalRadians) < 1e-3) {
+    // tratar como distância muito grande ou retornar valor máximo
+}
+```
+
+### 4. Muitos "magic numbers" sem centralização em Constants
+
+Os valores:
+
+```java
+double limelightMountAngleDegrees = 7.0;
+double limelightLensHeightInches = 6.5;
+double goalHeightInches = 12.25;
+double kp = 0.0032;
+public double maxSpeedX = 0.3;
+public double maxSpeedY = 0.3;
+```
+
+Estão todos hard-coded no subsistema. Para legibilidade e manutenção, seria melhor:
+
+* Movê-los para a classe `Constants` (já importada, mas não utilizada).
+* Dar nomes semânticos (ex.: `kLimelightMountAngleDeg`, `kLimelightLensHeightInches`, etc.).
+
+### 5. Importações não utilizadas
+
+O arquivo importa mas não usa:
+
+* `edu.wpi.first.math.MathUtil`
+* `frc.robot.Constants`
+
+Isso polui o arquivo e sugere funcionalidades que não existem. Devem ser removidos ou então usados (por exemplo, substituir o clamp manual por `MathUtil.clamp`).
+
+### 6. Clamp manual em vez de utilitário
+
+O código para limitar velocidade é repetitivo:
+
+```java
+if (targetingAngularVelocity > maxSpeedX) {
+    targetingAngularVelocity = maxSpeedX;
+} else if (targetingAngularVelocity < -maxSpeedX) {
+    targetingAngularVelocity = -maxSpeedX;
+}
+```
+
+E similar em `LimelightRunProportional()`.
+
+Como `MathUtil` já está importado, poderia ser usado:
+
+```java
+targetingAngularVelocity = MathUtil.clamp(targetingAngularVelocity, -maxSpeedX, maxSpeedX);
+```
+
+Isso reduz código e melhora clareza.
+
+### 7. Controle de distância sem setpoint explícito
+
+Em `LimelightRunProportional()`:
+
+```java
+double kp = 0.0032;
+double targetingVelocity = (this.DistanceToTarget()) * kp;
+targetingVelocity *= -1;
+```
+
+Problemas:
+
+* O erro é calculado em relação a **zero**; o robô vai tentar ir até distância 0 da meta (potencialmente batendo no alvo).
+* O comentário anterior indicava uma intenção melhor:
+
+  ```java
+  // (this.DistanceToTarget() - 3) * kp;
+  ```
+
+  Ou seja, um setpoint (ex.: 3 metros).
+
+Ideal seria ter algo como:
+
+```java
+double distance = this.DistanceToTarget();
+double error = distance - kDesiredDistance;
+double targetingVelocity = -kp * error;
+```
+
+Com `kDesiredDistance` definido em `Constants`.
+
+### 8. Falta de deadband e de saturação lógica
+
+Não há:
+
+* Deadband para erros muito pequenos (que poderiam gerar jitter).
+* Critério claro de "alvo atingido".
+
+Poderia haver algo como:
+
+```java
+if (Math.abs(error) < kDistanceTolerance) {
+    return 0.0;
+}
+```
+
+### 9. Estrutura geral
+
+O subsistema cumpre a função básica, mas em um review mais rigoroso eu apontaria:
+
+* Falta de encapsulamento (`maxSpeedX`, `maxSpeedY` públicos).
+* Uso de magic numbers em vez de constantes globalmente definidas.
+* Falta de tratamento de casos em que não há alvo válido.
+* Riscos numéricos na trigonometria.
+* Falta de unidade clara para distâncias (inches) enquanto o resto do robô pode estar em metros.
+
+---
+
+### **Resumo geral deste subsistema**
+
+Funciona como um controlador proporcional simples para strafe e avanço baseados na Limelight, mas carece de:
+
+* Encapsulamento adequado.
+* Uso consistente de constantes.
+* Tratamento de ausência de alvo e de limites numéricos.
+* Um setpoint claro de distância e deadband para estabilizar o robô.
+
+Com pequenas refatorações, ele pode ficar mais robusto, legível e seguro em campo.
