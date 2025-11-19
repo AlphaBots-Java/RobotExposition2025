@@ -7,6 +7,8 @@ package frc.robot;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -96,59 +98,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-        TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
-                AutoConstants.kMaxSpeedMetersPerSecond,
-                AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-                        .setKinematics(DriveConstants.kDriveKinematics);
-
-        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-                new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                List.of(
-                        new Translation2d(-0.75, 0),
-                        new Translation2d(-0.75, -0.9)),
-                new Pose2d(-1.25, -0.9, Rotation2d.fromDegrees(0)),
-                trajectoryConfig);
-
-        PIDController xController = new PIDController(AutoConstants.kPXController, 0, 0);
-        PIDController yController = new PIDController(AutoConstants.kPYController, 0, 0);
-        ProfiledPIDController thetaController = new ProfiledPIDController(
-            0, 0, 0, AutoConstants.kThetaControllerConstraints);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-                trajectory,
-                swerve::getPose,
-                DriveConstants.kDriveKinematics,
-                xController,
-                yController,
-                thetaController,
-                swerve::setModuleStates,
-                swerve);
-
-        Supplier<Double> turningLL = () -> this.lls.limelightStrafeProportional();
-        Supplier<Double> RunningLL = () -> this.lls.LimelightRunProportional();
-        Supplier<Double> zero = () -> 0.0;
-        Supplier<Double> back = () -> 0.1;
-        Supplier<Boolean> falso = () -> false;
-
-        LimeLightCommand limelightOriented = new LimeLightCommand(swerve, turningLL, RunningLL, zero, falso);
-        SwerveCommand backDrop = new SwerveCommand(swerve, back, zero, zero, falso);
-
-        return new SequentialCommandGroup(
-                //pos dir
-                //neg esq
-                new InstantCommand(() -> swerve.resetOdometry(trajectory.getInitialPose())),
-                swerveControllerCommand,
-                new InstantCommand(() -> elevator.ElevatorL2()),
-                new InstantCommand(() -> angulador.AnguladorL2()),
-                limelightOriented,
-                new InstantCommand(() -> sugador.Soltar()),
-                new WaitCommand(1),
-                new InstantCommand(() -> sugador.Parar()),
-                new WaitCommand(0.5),
-                backDrop,
-
-                new InstantCommand(() -> swerve.stopModules()));
-        // return null;
+    return new PathPlannerAuto("Example Auto");
   }
+  
 }

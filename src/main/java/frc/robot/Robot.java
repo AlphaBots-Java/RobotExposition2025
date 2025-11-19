@@ -5,7 +5,13 @@
 package frc.robot;
 
 
+import java.io.Console;
+
+import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.hardware.TalonFX;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -15,18 +21,32 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
 
+  final TalonFX joe = new TalonFX(21);
+  
   public Robot() {
     m_robotContainer = new RobotContainer();
+
+
+    m_Orchestra.addInstrument(joe);
+    var status = m_Orchestra.loadMusic("./death.chrp");
+    if (!status.isOK()) {
+      System.out.println("Error Loading Music");
+   }
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     m_robotContainer.PrintThings();
+
+    SmartDashboard.putBoolean("isPlaying", m_Orchestra.isPlaying());
+
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_Orchestra.stop();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -51,12 +71,22 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousExit() {}
 
+  Orchestra m_Orchestra = new Orchestra();
+
   @Override
   public void teleopInit() {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-  }
+  new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+                m_Orchestra.play();
+            } catch (Exception e) {
+            }
+        }).start();
+  
+}
 
   @Override
   public void teleopPeriodic() {

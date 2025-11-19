@@ -91,7 +91,7 @@ public class LimeLightCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        if (elapsed.get() < 9){return false;}else{return true;}
+        if (elapsed.get() < 3.5){return false;}else{return true;}
 
         
     }
