@@ -1,16 +1,23 @@
 package frc.robot.Subsystems; 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveModule frontLeft = new SwerveModule(
@@ -69,6 +76,35 @@ public class SwerveSubsystem extends SubsystemBase {
             } catch (Exception e) {
             }
         }).start();
+
+
+        RobotConfig config;
+        try{
+        config = RobotConfig.fromGUISettings();
+        
+    
+        AutoBuilder.configure(this::getPose,
+                              this::resetOdometry,
+                              () -> DriveConstants.kDriveKinematics.toChassisSpeeds(frontLeft.getState(),
+                                                                              frontRight.getState(),
+                                                                              backLeft.getState(), 
+                                                                              backRight.getState()), 
+                              (speeds, feedforward) -> driveRobotRelative(speeds),  
+                              new PPHolonomicDriveController( // PathPlanner`s lib for controlling drivetrains
+                              new PIDConstants(5.0, 0.0, 0.0), 
+                              new PIDConstants(5.0, 0.0, 0.0)),
+                              config ,
+                              () -> {
+                                var alliance = DriverStation.getAlliance();
+                                if (alliance.isPresent()) {
+                                    return alliance.get() == DriverStation.Alliance.Red;
+                                }
+                                return false;
+                              },
+                              this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void zeroHeading() {
@@ -128,5 +164,10 @@ public class SwerveSubsystem extends SubsystemBase {
         frontRight.setDesiredState(desiredStates[1], frontRight.getRotation2d());
         backLeft.setDesiredState(desiredStates[2], backLeft.getRotation2d());
         backRight.setDesiredState(desiredStates[3], backRight.getRotation2d());
+    }
+
+    public void driveRobotRelative(ChassisSpeeds Mspeeds){
+        SwerveModuleState[] moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(Mspeeds);
+        this.setModuleStates(moduleStates);
     }
 }

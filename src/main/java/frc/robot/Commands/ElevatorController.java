@@ -7,7 +7,7 @@ public class ElevatorController {
      PS5Controller controller = new PS5Controller(1);
     ElevatorSubsystem elevator = new ElevatorSubsystem();
     public void ControllElevator(){
-        elevator.SetPoint();
+        elevator.applySetPoint();
        
 
     }
@@ -16,30 +16,30 @@ public class ElevatorController {
         // 1 setpoint = 7mm
         if(controller.getR1ButtonPressed()){
             //pegar peca
-            elevator.UpdateSetPoint(0);
+            elevator.updateSetPoint(0);
         }
         if(controller.getR2ButtonPressed()){
             //L3
-            elevator.UpdateSetPoint(70.8);
+            elevator.updateSetPoint(70.8);
         }
         if(controller.getL2ButtonPressed()){
             //L2
-            elevator.UpdateSetPoint(13);
+            elevator.updateSetPoint(11);
         }
         if(controller.getL1ButtonPressed()){
             //L1
-            elevator.UpdateSetPoint(0);
+            elevator.updateSetPoint(0);
         }
     }
 
     public void ElevatorL2(){
-        elevator.UpdateSetPoint(13);
+        elevator.updateSetPoint(13);
     }
     public void ElevatorL1(){
-        elevator.UpdateSetPoint(0);
+        elevator.updateSetPoint(0);
     }
     public void ElevatorL3(){
-        elevator.UpdateSetPoint(70);
+        elevator.updateSetPoint(70);
     }
 
 }

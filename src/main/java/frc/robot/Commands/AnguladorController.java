@@ -17,13 +17,13 @@ public class AnguladorController {
     }
 
     public void printAngler(){
-        SmartDashboard.putNumber("AnguladorAngle", angulador.canCoder.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("AnguladorAngle", angulador.getAnglerAbsEncoder());
     }
 
     public void UpdateSetPoint(){
         if(controller.getR1ButtonReleased()){
             //pegar peca
-            angulador.AngUpdateSetPoint(-0.52);
+         angulador.AngUpdateSetPoint(-0.52);
         }
         if(controller.getR2ButtonReleased()){
             //L3
@@ -31,7 +31,7 @@ public class AnguladorController {
         }
         if(controller.getL2ButtonReleased()){
             //L2
-            angulador.AngUpdateSetPoint(-0.05);
+            angulador.AngUpdateSetPoint(-0.04);
         }
         if(controller.getL1ButtonReleased()){
             //L1
@@ -40,7 +40,7 @@ public class AnguladorController {
     }
 
     public void AnguladorL2(){
-        angulador.AngUpdateSetPoint(-0.05);
+        angulador.AngUpdateSetPoint(-0.04);
     }
     public void AnguladorL1(){
         angulador.AngUpdateSetPoint(0);

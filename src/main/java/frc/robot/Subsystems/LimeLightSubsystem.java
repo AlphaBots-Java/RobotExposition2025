@@ -9,8 +9,8 @@ import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 
 public class LimeLightSubsystem {
-    public double maxSpeedX = 0.3;
-    public double maxSpeedY = 0.3;
+    double maxSpeedX = 0.3;
+    double maxSpeedY = 0.3;
 
     public double limelightStrafeProportional(){    
         // double kP = .015;
